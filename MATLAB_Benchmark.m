@@ -1,8 +1,9 @@
 % Benchmarking MATLAB Performance
 disp('Testing some linear algebra functions');
-disp('Eig');tic;data=rand(500,500);eig(data);toc;
-disp('Svd');tic;data=rand(1000,1000);[u,s,v]=svd(data);s=svd(data);toc;
-disp('Inv');tic;data=rand(1000,1000);result=inv(data);toc;
-disp('Det');tic;data=rand(1000,1000);result=det(data);toc;
-disp('Dot');tic;a=rand(1000,1000);b=inv(a);result=a*b-eye(1000);toc;
+i=1000;
+disp('Eig');tic;data=rand(i,i);eig(data);toc;
+disp('Svd');tic;data=rand(i,i);[u,s,v]=svd(data);s=svd(data);toc;
+disp('Inv');tic;data=rand(i,i);result=inv(data);toc;
+disp('Det');tic;data=rand(i,i);result=det(data);toc;
+disp('Dot');tic;a=rand(i,i);b=inv(a);result=a*b-eye(i);toc;
 disp('Done');

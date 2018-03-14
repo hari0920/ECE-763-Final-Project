@@ -14,7 +14,7 @@ int main()
 	//Start Timer
 	auto t1 = std::chrono::system_clock::now();
 	//Fill random matrix 
-	int size = 500;
+	int size = 1000;
 	MatrixXd m = MatrixXd::Random(size, size);
 	//Do stuff
 	//m.inverse();
@@ -29,7 +29,7 @@ int main()
 	//Start Timer
 	t1 = std::chrono::system_clock::now();
 	//Fill random matrix
-	size = 1000;
+	//size = 1000;
 	m = MatrixXd::Random(size, size);
 	//Do stuff
 	//comparing SVD approaches
@@ -52,7 +52,7 @@ int main()
 	//Start Timer
 	t1 = std::chrono::system_clock::now();
 	//Fill random matrix
-	size = 1000;
+	//size = 1000;
 	m = MatrixXd::Random(size, size);
 	//Do stuff
 	m.inverse();
@@ -65,7 +65,7 @@ int main()
 	//Start Timer
 	t1 = std::chrono::system_clock::now();
 	//Fill random matrix
-	size = 1000;
+	//size = 1000;
 	m = MatrixXd::Random(size, size);
 	//Do stuff
 	m.determinant();
@@ -78,7 +78,7 @@ int main()
 	//Start Timer
 	t1 = std::chrono::system_clock::now();
 	//Fill random matrix
-	size = 1000;
+	//size = 1000;
 	m = MatrixXd::Random(size, size);
 	//Do stuff
 	MatrixXd b = m.inverse();

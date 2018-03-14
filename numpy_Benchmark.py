@@ -1,7 +1,7 @@
 import os
 import sys
 import timeit
-
+import time
 import numpy
 from numpy.random import random
 
@@ -81,14 +81,13 @@ def start_benchmark():
     print(
     "Starting timing with numpy %s\nVersion: %s" % (numpy.__version__, sys.version))
     print(
-    "%20s : %10s" % ("Function", "Timing [ms]"))
+    "%20s : %10s" % ("Function", "Timing [s]"))
     for fun, bench in tests.items():
         t = timeit.Timer(stmt="%s()" % fun.__name__, setup="from __main__ import %s" % fun.__name__)
-        res = t.repeat(repeat=3, number=1)
-        timing = 1000.0 * sum(res) / len(res)
+        res = t.repeat(number=1)
+        timing = sum(res) / len(res)
         print(
-        "%20s : %7.9f s" % (fun.__name__, timing))#, bench[0] / timing, bench[1] / timing))
-
+        "%20s : %7.9f" % (fun.__name__, timing))#, bench[0] / timing, bench[1] / timing))# , bench[0] / timing, bench[1] / timing))
 
 if __name__ == '__main__':
     start_benchmark()

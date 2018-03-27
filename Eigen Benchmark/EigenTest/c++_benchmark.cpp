@@ -1,6 +1,6 @@
 //Benchmarking Eigen 
 //Author:Hariharan Ramshankar
-#define EIGEN_USE_MKL_ALL //to test MKL improvement
+//#define EIGEN_USE_MKL_ALL //to test MKL improvement (uncomment in Windows Visual Studio)
 #include <iostream>
 #include <Eigen/Dense>
 #include <chrono>
@@ -10,16 +10,20 @@ using namespace Eigen;
 int main()
 {
 	cout << nbThreads() << endl; //Displays the Number of Parallel Threads Eigen will use
-	cout<<"Eigenvalue"<<endl;
+	
+	int i = 10;
+	for(int size=i;size<500;size*=5)
+	{
+	cout<<endl;
+	cout<<"Size:"<<size<<endl;
+	cout << "Eigenvalue" << endl;
 	//Start Timer
 	auto t1 = std::chrono::system_clock::now();
 	//Fill random matrix 
-	int size = 1000;
 	MatrixXd m = MatrixXd::Random(size, size);
 	//Do stuff
 	//m.inverse();
-	Eigen::SelfAdjointEigenSolver<MatrixXd> eigensolver(m);
-	if (eigensolver.info() != Success) abort();
+	m.eigenvalues();
 	auto t2 = std::chrono::system_clock::now();
 	//auto fp_ms = (std::chrono::system_clock::now() - wcts);
 	std::chrono::duration<double, std::milli> fp_ms1 = t2 - t1;
@@ -33,15 +37,13 @@ int main()
 	m = MatrixXd::Random(size, size);
 	//Do stuff
 	//comparing SVD approaches
-	if (size > 10000)
+	if (size > 5000)
 	{
-		Eigen::BDCSVD<MatrixXd> svdsolver(m);
-		svdsolver.compute(m);
+		m.bdcSvd();
 	}
 	else
 	{
-		Eigen::JacobiSVD<MatrixXd> jacobisvd(m);
-		jacobisvd.compute(m);
+		m.jacobiSvd();
 	}
 	t2 = std::chrono::system_clock::now();
 	//auto fp_ms = (std::chrono::system_clock::now() - wcts);
@@ -78,18 +80,30 @@ int main()
 	//Start Timer
 	t1 = std::chrono::system_clock::now();
 	//Fill random matrix
-	//size = 1000;
+	//size = 10000;
 	m = MatrixXd::Random(size, size);
 	//Do stuff
-	MatrixXd b = m.inverse();
-	MatrixXd result = m * b;
+	MatrixXd result = m*m.inverse();
 	t2 = std::chrono::system_clock::now();
 	//auto fp_ms = (std::chrono::system_clock::now() - wcts);
 	fp_ms1 = t2 - t1;
 	std::cout << "Finished in " << fp_ms1.count() << "ms" << std::endl;
+	
 
-	std::cout << "All Tests Done"<< std::endl;
-
-	std::getchar();
-	return 0;
+	cout<<"Testing Multi-Core Performance"<<endl;
+	//Start Timer
+	t1 = std::chrono::system_clock::now();
+	int n = 10000;
+	MatrixXd A = MatrixXd::Ones(n, n);
+	MatrixXd B = MatrixXd::Ones(n, n);
+	MatrixXd C = MatrixXd::Ones(n, n);
+	C.noalias() += A * B;
+	std::cout << C.sum() << "\n";
+	t2 = std::chrono::system_clock::now();
+	fp_ms1 = t2 - t1;
+	std::cout << "Finished in " << fp_ms1.count() << "ms" << std::endl;
+	}
+	std::cout << "All Tests Done" << std::endl;
+	//std::getchar();
+return 0;
 }

@@ -1,0 +1,1 @@
+/usr/bin/c++    -fopenmp -Wall -DNDEBUG  -O3 -march=native -std=c++11 -DMKL_LP64 -m64 -L/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl -O3 -DNDEBUG   CMakeFiles/c++_benchmark.dir/c++_benchmark.cpp.o  -o c++_benchmark -rdynamic 

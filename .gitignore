@@ -305,3 +305,5 @@ $RECYCLE.BIN/
 *.db
 Eigen Benchmark/EigenTest/.vs/
 eigen-git-mirror-master/
+*.jpg
+*.png 

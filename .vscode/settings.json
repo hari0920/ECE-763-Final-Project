@@ -2,5 +2,6 @@
     "git.ignoreLimitWarning": true,
     "files.associations": {
         "chrono": "cpp"
-    }
+    },
+    "python.pythonPath": "/home/hariharan/anaconda3/envs/DeepLearning/bin/python"
 }

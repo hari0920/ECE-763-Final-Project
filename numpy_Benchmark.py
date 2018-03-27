@@ -23,7 +23,7 @@ def test_svd():
     """
 
 
-i = 1000
+i = 500
 data = random((i, i))
 result = numpy.linalg.svd(data)
 result = numpy.linalg.svd(data, full_matrices=False)
@@ -35,7 +35,7 @@ def test_inv():
     """
 
 
-i = 1000
+i = 500
 data = random((i, i))
 result = numpy.linalg.inv(data)
 
@@ -46,7 +46,7 @@ def test_det():
     """
 
 
-i = 1000
+i = 500
 data = random((i, i))
 result = numpy.linalg.slogdet(data)[1]
 
@@ -57,7 +57,7 @@ def test_dot():
     """
 
 
-i = 1000
+i = 500
 a = random((i, i))
 b = numpy.linalg.inv(a)
 result = numpy.dot(a, b) - numpy.eye(i)

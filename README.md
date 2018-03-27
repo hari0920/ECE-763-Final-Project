@@ -42,3 +42,11 @@ All Tests Done
 
 #### Summary
 C++ was the fastest of all 3 approaches.
+
+
+## Project Overview
+## Part 1
+This part involves training a basic neural network architecture and visualizing\validating the intermediate steps.\
+10,000 training images and 1000 testing images for a train test split of 10:1 ( Might increase later depending on availability of data).\
+
+

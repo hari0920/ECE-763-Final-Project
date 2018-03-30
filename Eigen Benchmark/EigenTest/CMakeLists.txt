@@ -39,9 +39,9 @@ add_definitions(-DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL)
 include_directories(${MKLROOT}/include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMKL_LP64 -m64 -L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl")
 
-#Eigen 
-target_link_libraries (${PROJECT_NAME} Eigen3::Eigen)
-
 add_executable (${PROJECT_NAME} c++_benchmark.cpp)
 
+
+#Eigen 
+target_link_libraries (${PROJECT_NAME} Eigen3::Eigen)
 

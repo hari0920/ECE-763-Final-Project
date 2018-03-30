@@ -307,3 +307,6 @@ Eigen Benchmark/EigenTest/.vs/
 eigen-git-mirror-master/
 *.jpg
 *.png 
+Pre-Trained Models
+.vscode
+Data

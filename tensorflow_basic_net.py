@@ -129,21 +129,22 @@ print(labels_all.shape)
 
 # Parameters
 learning_rate = 0.001
-training_epochs = 100
+training_epochs = 10
 batch_size = 256
 display_step = 1
 
 
 # Network Parameters
-n_hidden_1 = 64*64 # 1st layer number of neurons
-n_hidden_2 =  512# 2nd layer number of neurons
+n_hidden_1 = 512 # 1st layer number of neurons
+n_hidden_2 =  256# 2nd layer number of neurons
 n_input = patch_size*patch_size*3 # data input (img shape: 64*64)
 n_classes = 2
 
 # tf Graph input
-X = tf.placeholder("float", [None, n_input])
-Y = tf.placeholder("float", [None, n_classes])
-
+X = tf.placeholder("float", [None, n_input],name="X")
+Y = tf.placeholder("float", [None, n_classes],name="Y")
+print(X.name)
+print(Y.name)
 # Store layers weight & bias
 weights = {
     'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
@@ -171,7 +172,7 @@ def multilayer_perceptron(x):
 
 # Construct model
 logits = multilayer_perceptron(X)
-
+#print(logits.name)
 # Define loss and optimizer
 loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
     logits=logits, labels=Y))
@@ -186,7 +187,7 @@ init = tf.global_variables_initializer()
 
 
 # In[ ]:
-
+saver =tf.train.Saver()
 
 with tf.Session() as sess:
     sess.run(init)
@@ -208,7 +209,8 @@ with tf.Session() as sess:
         if epoch % display_step == 0:
             print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost))
     print("Optimization Finished!")
-    
+    saver.save(sess, './trained-models/my_test_model')
+    print("model saved")
     # Test model
     pred = tf.nn.softmax(logits)  # Apply softmax to logits
     correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))

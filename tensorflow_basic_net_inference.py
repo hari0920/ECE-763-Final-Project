@@ -1,11 +1,33 @@
+#This is to run inference on a saved model
 import numpy as np
 import cv2
+import time
 import tensorflow as tf
-hello = tf.constant('Hello, TensorFlow!')
-w1 = tf.Variable(tf.random_normal(shape=[2]), name='w1')
-w2 = tf.Variable(tf.random_normal(shape=[5]), name='w2')
-saver = tf.train.Saver()
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-saver.save(sess, './trained-models/my_test_model')
+sess=tf.Session()
+saver = tf.train.import_meta_graph('./trained-models/my_test_model.meta')
+saver.restore(sess, tf.train.latest_checkpoint('./trained-models/'))
+graph = tf.get_default_graph()
+X=graph.get_tensor_by_name("X:0")
+Y=graph.get_tensor_by_name("add:0")
+cap = cv2.VideoCapture(0)
+patch_size=64
+while(True):
+    ret,frame=cap.read()
+    frame_new=cv2.resize(frame, (patch_size, patch_size), cv2.INTER_LANCZOS4)
+    frame_new=frame_new.flatten()
+    frame_new=frame_new[np.newaxis,:]
+    tic=time.time()
+    dec = sess.run(Y, feed_dict={X: frame_new}) # decoded output
+    toc=time.time()
+    if(np.argmax(dec)==0):
+        decision="face"
+    else:
+        decision="non-face"
+    cv2.putText(frame, decision, (100, 250), cv2.FONT_HERSHEY_SIMPLEX, 5, 255)
+    cv2.imshow("Frame", frame)
+    if(cv2.waitKey()==ord('q')):
+        break
 
+
+cap.release()
+cv2.destroyAllWindows()

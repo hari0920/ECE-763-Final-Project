@@ -308,5 +308,6 @@ eigen-git-mirror-master/
 *.jpg
 *.png 
 Pre-Trained Models
+trained-models
 .vscode
 Data

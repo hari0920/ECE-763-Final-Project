@@ -332,30 +332,31 @@ with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
     # op to write logs to Tensorboard
-    summary_writer = tf.summary.FileWriter(
-        logs_path, graph=tf.get_default_graph())
+    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     for step in range(1, training_epochs+1):
         avg_cost=0
         total_batch = int(train_all.shape[0]/batch_size)
         for i in range(total_batch):
             batch_x, batch_y = model.next_batch(batch_size)
             # Run optimization op (backprop)
-            sess.run(train_op, feed_dict={X: batch_x,
+            _,summary=sess.run([train_op,merged_summary_op], feed_dict={X: batch_x,
                                         Y: batch_y, keep_prob: dropout})
-            if step % display_step == 0 or step == 1:
-                # Calculate batch loss and accuracy
-                loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
-                                                                    Y: batch_y,
-                                                                keep_prob: 1.0})
-            # Compute average loss
-            #avg_cost += loss / total_batch
-            print("Step " + str(step) + ", Minibatch Loss= " +
-                "{:.4f}".format(loss) + ", Training Accuracy= " +
-                "{:.3f}".format(acc))
-            
+            #write logs
+            summary_writer.add_summary(summary, step*total_batch+1)
+        if step % display_step == 0 or step == 1:
+            # Calculate batch loss and accuracy
+            loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
+                                                                Y: batch_y,
+                                                            keep_prob: 1.0})
+        # Compute average loss
+        #avg_cost += loss / total_batch
+        print("Step " + str(step) + ", Minibatch Loss= " +
+            "{:.4f}".format(loss) + ", Training Accuracy= " +
+            "{:.3f}".format(acc))
+        
 
     print("Optimization Finished!")
-    saver.save(sess, './trained-models/cnn/my_Lenet_model')
+    saver.save(sess, './trained-models/cnn/my_convnet_model')
     # Calculate accuracy for test images
     print("Testing Accuracy:",
           sess.run(accuracy, feed_dict={X: test_all,

@@ -4,7 +4,7 @@ import cv2
 import time
 import tensorflow as tf
 sess=tf.Session()
-saver = tf.train.import_meta_graph('./trained-models/my_final_model.meta')
+saver = tf.train.import_meta_graph('./trained-models/my_testcnn_model.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./trained-models/'))
 graph = tf.get_default_graph()
 X=graph.get_tensor_by_name("X:0")
@@ -18,10 +18,7 @@ while(True):
     frame_new=frame_new[np.newaxis,:]
     tic=time.time()
     dec = sess.run(Y, feed_dict={X: frame_new}) # decoded output
-<<<<<<< HEAD
     #print(sess.run(tf.nn.softmax(dec)))
-=======
->>>>>>> 3ccf28bc58fc517c38ec6b2a45ff9898451c3c3b
     toc=time.time()
     if(np.argmax(dec)==0):
         decision="face"

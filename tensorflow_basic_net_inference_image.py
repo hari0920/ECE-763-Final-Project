@@ -2,7 +2,12 @@
 import numpy as np
 import cv2
 import time
+import argparse
 import tensorflow as tf
+parser = argparse.ArgumentParser(description='Run Inference on image with savedModel.')
+parser.add_argument("-m","--model",required=True,type=String,help='path to model')
+args=parser.parse_args()
+print(args.model)
 sess = tf.Session()
 saver = tf.train.import_meta_graph('./trained-models/my_final_model.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./trained-models/'))

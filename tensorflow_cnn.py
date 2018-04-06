@@ -129,10 +129,11 @@ model = FaceDetect(train_all, labels_all)
 
 # Training Parameters
 learning_rate = 0.001
-training_epochs = 10000
+training_epochs = 50000
 batch_size = 128
 display_step = 10
 threshold=0.01
+logs_path='./logs/cnn/'
 
 # Network Parameters
 num_input = patch_size*patch_size*3 # data input (img shape: patch_size*patch_size)
@@ -226,7 +227,7 @@ def Lenet(x,weights,biases,dropout):
 #Lenet
 # Store layers weight & bias
 lenet_weights = {
-    # 5x5 conv, 1 input, 6 outputs
+    # 5x5 conv, 1 input, 32 outputs
     'wc1': tf.Variable(tf.random_normal([5, 5, 3, 6])),
     # 5x5 conv, 6 inputs, 16 outputs
     'wc2': tf.Variable(tf.random_normal([5, 5, 6, 16])),
@@ -282,10 +283,10 @@ def conv_net(x, weights, biases, dropout):
 
 # Store layers weight & bias
 weights = {
-    # 5x5 conv, 1 input, 32 outputs
-    'wc1': tf.Variable(tf.random_normal([5, 5, 3, 32])),
-    # 5x5 conv, 32 inputs, 64 outputs
-    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
+    # 4x4 conv, 1 input, 32 outputs
+    'wc1': tf.Variable(tf.random_normal([4, 4, 3, 32])),
+    # 4x4 conv, 32 inputs, 64 outputs
+    'wc2': tf.Variable(tf.random_normal([4, 4, 32, 64])),
     # fully connected, 16*16*64 inputs, 1024 outputs
     'wd1': tf.Variable(tf.random_normal([(16)*(16)*64, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
@@ -299,42 +300,52 @@ biases = {
     'out': tf.Variable(tf.random_normal([num_classes]))
 }
 
-# Construct model
-#logits = conv_net(X, weights, biases, keep_prob)
-logits = Lenet(X, lenet_weights, lenet_biases, keep_prob)
-prediction = tf.nn.softmax(logits)
+with tf.name_scope('model'):
+    # Construct model
+    logits = conv_net(X, weights, biases, keep_prob)
+    #logits = Lenet(X, lenet_weights, lenet_biases, keep_prob)
+    prediction = tf.nn.softmax(logits)
+with tf.name_scope('loss'):
+    # Define loss and optimizer
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+        logits=logits, labels=Y))
+with tf.name_scope('AdamOptimizer'):
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)    
+    train_op = optimizer.minimize(loss_op)
 
-# Define loss and optimizer
-loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-    logits=logits, labels=Y))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-train_op = optimizer.minimize(loss_op)
-
-
-# Evaluate model
-correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+with tf.name_scope('Accuracy'):
+    # Evaluate model
+    correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
+
+tf.summary.scalar("loss",loss_op)
+
+tf.summary.scalar("accuracy",accuracy)
+merged_summary_op=tf.summary.merge_all()
 
 saver =tf.train.Saver()
 # Start training
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
-    #total_batch = int(train_all.shape[0]/batch_size)
+    # op to write logs to Tensorboard
+    summary_writer = tf.summary.FileWriter(
+        logs_path, graph=tf.get_default_graph())
     for step in range(1, training_epochs+1):
-        #avg_cost=0
-        #for i in range(total_batch):
-        batch_x, batch_y = model.next_batch(batch_size)
-        # Run optimization op (backprop)
-        sess.run(train_op, feed_dict={X: batch_x,
-                                    Y: batch_y, keep_prob: dropout})
-        if step % display_step == 0 or step == 1:
-            # Calculate batch loss and accuracy
-            loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
-                                                                Y: batch_y,
+        avg_cost=0
+        total_batch = int(train_all.shape[0]/batch_size)
+        for i in range(total_batch):
+            batch_x, batch_y = model.next_batch(batch_size)
+            # Run optimization op (backprop)
+            sess.run(train_op, feed_dict={X: batch_x,
+                                        Y: batch_y, keep_prob: dropout})
+            if step % display_step == 0 or step == 1:
+                # Calculate batch loss and accuracy
+                loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
+                                                                    Y: batch_y,
                                                                 keep_prob: 1.0})
             # Compute average loss
             #avg_cost += loss / total_batch
@@ -344,7 +355,7 @@ with tf.Session() as sess:
             
 
     print("Optimization Finished!")
-    saver.save(sess, './trained-models/my_Lenet_model')
+    saver.save(sess, './trained-models/cnn/my_Lenet_model')
     # Calculate accuracy for test images
     print("Testing Accuracy:",
           sess.run(accuracy, feed_dict={X: test_all,

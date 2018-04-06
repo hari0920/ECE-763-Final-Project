@@ -133,29 +133,19 @@ np.random.shuffle(perm)
 train_all = train_all[perm]
 labels_all = labels_all[perm]
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 3ccf28bc58fc517c38ec6b2a45ff9898451c3c3b
 # In[72]:
 model = FaceDetect(train_all, labels_all)
 
 # Parameters
 learning_rate = 0.001
-<<<<<<< HEAD
-training_epochs = 1000
+training_epochs = 300
 batch_size = 128
 display_step = 10
-=======
-training_epochs = 100
-batch_size = 128
-display_step = 5
->>>>>>> 3ccf28bc58fc517c38ec6b2a45ff9898451c3c3b
-
+logs_path ='./logs/basic_net/'
 
 # Network Parameters
-n_hidden_1 = 512 # 1st layer number of neurons
-n_hidden_2 =  256# 2nd layer number of neurons
+n_hidden_1 = 2048 # 1st layer number of neurons
+n_hidden_2 = 1024 # 2nd layer number of neurons
 n_input = patch_size*patch_size*3 # data input (img shape: 64*64)
 n_classes = 2
 
@@ -165,17 +155,19 @@ Y = tf.placeholder("float", [None, n_classes],name="Y")
 print(X.name)
 print(Y.name)
 # Store layers weight & bias
-weights = {
-    'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-    'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-    'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
-}
+with tf.name_scope('weights'):
+    weights = {
+        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+    }
 
-biases = {
-    'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-    'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-    'out': tf.Variable(tf.random_normal([n_classes]))
-}
+with tf.name_scope('biases'):
+    biases = {
+        'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+        'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_classes]))
+    }
 
 
 
@@ -183,37 +175,41 @@ biases = {
 def multilayer_perceptron(x):
     # Hidden fully connected layer with 256 neurons
     layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
+    layer_1=tf.nn.relu(layer_1)
     # Hidden fully connected layer with 256 neurons
     layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    layer_2=tf.nn.relu(layer_2)
     # Output fully connected layer with a neuron for each class
     out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
     #print(out_layer.name)
     return out_layer
 
 # Construct model
-logits = multilayer_perceptron(X)
-#print(logits.name)
-<<<<<<< HEAD
-prediction = tf.nn.softmax(logits)
+with tf.name_scope('model'):
+    logits = multilayer_perceptron(X)
+    #print(logits.name)
+    prediction = tf.nn.softmax(logits)
 
-=======
->>>>>>> 3ccf28bc58fc517c38ec6b2a45ff9898451c3c3b
-# Define loss and optimizer
-loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-    logits=logits, labels=Y))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-train_op = optimizer.minimize(loss_op)
+with tf.name_scope('loss'):
+    # Define loss and optimizer
+    loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
+with tf.name_scope('AdamOptimizer'):
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    train_op = optimizer.minimize(loss_op)
 
-
-# Evaluate model
-correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+with tf.name_scope('Accuracy'):
+    # Evaluate model
+    correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Initializing the variables
 init = tf.global_variables_initializer()
 
+#Summary Creation
+tf.summary.scalar("loss",loss_op)
 
-
+tf.summary.scalar("accuracy", accuracy)
+merged_summary_op=tf.summary.merge_all()
 
 
 
@@ -223,30 +219,31 @@ saver =tf.train.Saver()
 with tf.Session() as sess:
     sess.run(init)
 
+    # op to write logs to Tensorboard
+    summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     # Training cycle
     for epoch in range(training_epochs):
         avg_cost = 0.
-#        index_in_epoch=0
         total_batch = int(train_all.shape[0]/batch_size)
         # Loop over all batches
         for i in range(total_batch):
-            #batch_x, batch_y,index_in_epoch,train_all,labels_all = next_batch(batch_size,index_in_epoch,num_training_images,train_all,labels_all)
             batch_x,batch_y=model.next_batch(batch_size)
             # Run optimization op (backprop) and cost op (to get loss value)
-            _, c,acc = sess.run([train_op, loss_op,accuracy], feed_dict={X: batch_x,
-                                                            Y: batch_y})
+            _, c,acc,summary = sess.run([train_op, loss_op,accuracy,merged_summary_op], feed_dict={X: batch_x,Y: batch_y})
+            #write logs
+            summary_writer.add_summary(summary,epoch*total_batch+1)
             # Compute average loss
             avg_cost += c / total_batch
         # Display logs per epoch step
         if epoch % display_step == 0:
             print("Epoch:", '%04d' % (epoch+1), "cost={:.9f}".format(avg_cost),"training accuracy={:.3f}".format(acc))
     print("Optimization Finished!")
-    saver.save(sess, './trained-models/my_final_model')
+    saver.save(sess, './trained-models/basic_net/my_final_model')
  #   print("model saved")
     # Test model
-    pred = tf.nn.softmax(logits)  # Apply softmax to logits
-    correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
+    #pred = tf.nn.softmax(logits)  # Apply softmax to logits
+    #correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
     # Calculate accuracy
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
     print("Testing Accuracy:", accuracy.eval({X: test_all, Y: labels_all_test}))
 

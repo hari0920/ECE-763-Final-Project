@@ -128,8 +128,8 @@ labels_all = labels_all[perm]
 model = FaceDetect(train_all, labels_all)
 
 # Training Parameters
-learning_rate = 0.001
-training_epochs = 50000
+learning_rate = 0.01
+training_epochs = 1000
 batch_size = 128
 display_step = 10
 threshold=0.01
@@ -138,7 +138,7 @@ logs_path='./logs/cnn/'
 # Network Parameters
 num_input = patch_size*patch_size*3 # data input (img shape: patch_size*patch_size)
 num_classes = 2  # total classes
-dropout = 0.75  # Dropout, probability to keep units
+dropout = 0.70  # Dropout, probability to keep units
 
 # tf Graph input
 X = tf.placeholder(tf.float32, [None, num_input]) #batch_size, num_input
@@ -284,9 +284,9 @@ def conv_net(x, weights, biases, dropout):
 # Store layers weight & bias
 weights = {
     # 4x4 conv, 1 input, 32 outputs
-    'wc1': tf.Variable(tf.random_normal([4, 4, 3, 32])),
+    'wc1': tf.Variable(tf.random_normal([5, 5, 3, 32])),
     # 4x4 conv, 32 inputs, 64 outputs
-    'wc2': tf.Variable(tf.random_normal([4, 4, 32, 64])),
+    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
     # fully connected, 16*16*64 inputs, 1024 outputs
     'wd1': tf.Variable(tf.random_normal([(16)*(16)*64, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
@@ -334,29 +334,28 @@ with tf.Session() as sess:
     # op to write logs to Tensorboard
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     for step in range(1, training_epochs+1):
-        avg_cost=0
+        #avg_cost=0
         total_batch = int(train_all.shape[0]/batch_size)
-        for i in range(total_batch):
-            batch_x, batch_y = model.next_batch(batch_size)
-            # Run optimization op (backprop)
-            _,summary=sess.run([train_op,merged_summary_op], feed_dict={X: batch_x,
-                                        Y: batch_y, keep_prob: dropout})
-            #write logs
-            summary_writer.add_summary(summary, step*total_batch+1)
+        #for i in range(total_batch):
+        batch_x, batch_y = model.next_batch(batch_size)
+        # Run optimization op (backprop)
+        _,summary=sess.run([train_op,merged_summary_op], feed_dict={X: batch_x,Y: batch_y, keep_prob: dropout})
+        #write logs
+        summary_writer.add_summary(summary, step)
         if step % display_step == 0 or step == 1:
             # Calculate batch loss and accuracy
             loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
                                                                 Y: batch_y,
                                                             keep_prob: 1.0})
-        # Compute average loss
-        #avg_cost += loss / total_batch
-        print("Step " + str(step) + ", Minibatch Loss= " +
+            # Compute average loss
+            #avg_cost += loss / total_batch
+            print("Step " + str(step) + ", Minibatch Loss= " +
             "{:.4f}".format(loss) + ", Training Accuracy= " +
             "{:.3f}".format(acc))
         
 
     print("Optimization Finished!")
-    saver.save(sess, './trained-models/cnn/my_convnet_model')
+    saver.save(sess, './trained-models/cnn/my_cnn_model_final')
     # Calculate accuracy for test images
     print("Testing Accuracy:",
           sess.run(accuracy, feed_dict={X: test_all,

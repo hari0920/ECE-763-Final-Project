@@ -1,0 +1,3 @@
+[submodule "Faster R-CNN/tf-faster-rcnn"]
+	path = Faster R-CNN/tf-faster-rcnn
+	url = https://github.com/endernewton/tf-faster-rcnn.git

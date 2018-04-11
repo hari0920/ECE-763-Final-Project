@@ -18,15 +18,15 @@ saver = tf.train.import_meta_graph(model_path)
 saver.restore(sess, tf.train.latest_checkpoint(checkpoint_path))
 graph = tf.get_default_graph()
 X = graph.get_tensor_by_name("X:0")
-Y = graph.get_tensor_by_name("model/add:0")
+Y = graph.get_tensor_by_name("model/Softmax:0")
+keep_prob=graph.get_tensor_by_name("dropout:0")
 patch_size = 64
 frame = cv2.imread(image_path)
 frame_new = cv2.resize(frame, (patch_size, patch_size), cv2.INTER_LANCZOS4)
 frame_new = frame_new.flatten()
 frame_new = frame_new[np.newaxis, :]
 tic = time.time()
-#dec = Y.eval(feed_dict:{X:frame_new})
-dec=sess.run(Y, feed_dict={X: frame_new})  # decoded output
+dec = sess.run(Y, feed_dict={X: frame_new,keep_prob:1.0})  # decoded output
 toc = time.time()
 if(np.argmax(dec) == 0):
     decision = "face"

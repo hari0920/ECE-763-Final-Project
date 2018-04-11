@@ -141,10 +141,12 @@ num_classes = 2  # total classes
 dropout = 0.70  # Dropout, probability to keep units
 
 # tf Graph input
-X = tf.placeholder(tf.float32, [None, num_input]) #batch_size, num_input
-Y = tf.placeholder(tf.float32, [None, num_classes]) #batch_size, num_classes
-keep_prob = tf.placeholder(tf.float32)  # dropout (keep probability)
-
+X = tf.placeholder(tf.float32, [None, num_input],name="X") #batch_size, num_input
+Y = tf.placeholder(tf.float32, [None, num_classes],name="Y") #batch_size, num_classes
+keep_prob = tf.placeholder(tf.float32,name="dropout")  # dropout (keep probability)
+print(X.name)
+print(Y.name)
+print(keep_prob.name)
 # Create some wrappers for simplicity
 def conv2d(x, W, b, strides=1):
     # Conv2D wrapper, with bias and relu activation
@@ -195,8 +197,8 @@ def Lenet(x,weights,biases,dropout):
     Input
     x->contains the images in (patch_size,patch_size,3) format
     The LeNet architecture accepts a 32x32xC image as input, where C is the number of color channels.
-    Modifying to accept 64x64 images 
-    
+    Modifying to accept 64x64 images
+
     Architecture
     Layer 1: Convolutional. The output shape should be 28x28x6.
 
@@ -233,7 +235,7 @@ lenet_weights = {
     'wc2': tf.Variable(tf.random_normal([5, 5, 6, 16])),
     # fully connected, 16*16*16 inputs, 400 outputs
     'wd1': tf.Variable(tf.random_normal([(16)*(16)*16, 400])),
-    # fully connected 400 inputs, 120 outputs 
+    # fully connected 400 inputs, 120 outputs
     'wd2': tf.Variable(tf.random_normal([400,120])),
     #fully connected 120 inputs, 84 outputs
     'wd3': tf.Variable(tf.random_normal([120,84])),
@@ -303,14 +305,16 @@ biases = {
 with tf.name_scope('model'):
     # Construct model
     logits = conv_net(X, weights, biases, keep_prob)
+    print(logits.name)
     #logits = Lenet(X, lenet_weights, lenet_biases, keep_prob)
     prediction = tf.nn.softmax(logits)
+    print(prediction.name)
 with tf.name_scope('loss'):
     # Define loss and optimizer
     loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
         logits=logits, labels=Y))
 with tf.name_scope('AdamOptimizer'):
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)    
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     train_op = optimizer.minimize(loss_op)
 
 with tf.name_scope('Accuracy'):
@@ -352,7 +356,7 @@ with tf.Session() as sess:
             print("Step " + str(step) + ", Minibatch Loss= " +
             "{:.4f}".format(loss) + ", Training Accuracy= " +
             "{:.3f}".format(acc))
-        
+
 
     print("Optimization Finished!")
     saver.save(sess, './trained-models/cnn/my_cnn_model_final')

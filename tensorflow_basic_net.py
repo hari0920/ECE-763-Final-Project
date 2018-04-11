@@ -7,7 +7,7 @@
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
-import glob 
+import glob
 import cv2
 
 
@@ -49,9 +49,9 @@ class FaceDetect:
         end = self.index_in_epoch
         return self.images[start:end], self.labels[start:end]
 
-        
-    
-#import data 
+
+
+#import data
 patch_size =64
 num_training_images=10000
 num_testing_images=1000
@@ -139,13 +139,13 @@ model = FaceDetect(train_all, labels_all)
 # Parameters
 learning_rate = 0.001
 training_epochs = 300
-batch_size = 128
+batch_size = 256
 display_step = 10
 logs_path ='./logs/basic_net/'
 
 # Network Parameters
-n_hidden_1 = 2048 # 1st layer number of neurons
-n_hidden_2 = 1024 # 2nd layer number of neurons
+n_hidden_1 = 1024 # 1st layer number of neurons
+n_hidden_2 = 512 # 2nd layer number of neurons
 n_input = patch_size*patch_size*3 # data input (img shape: 64*64)
 n_classes = 2
 
@@ -246,4 +246,3 @@ with tf.Session() as sess:
     # Calculate accuracy
     #accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
     print("Testing Accuracy:", accuracy.eval({X: test_all, Y: labels_all_test}))
-
